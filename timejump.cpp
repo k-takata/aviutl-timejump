@@ -106,7 +106,7 @@ FILTER_DLL filter = {
 	NULL, NULL,
 	NULL,
 	NULL,
-	"時間ジャンプ version 0.03 by K.Takata",
+	"時間ジャンプ version 0.04 by K.Takata",
 	NULL, NULL,
 	NULL, NULL, NULL, NULL,
 	NULL,
@@ -417,9 +417,34 @@ BOOL func_WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
 		PostMessage(GetWindowOwner(hwnd), message, wParam, lParam);
 		break;
 		
+	case WM_FILTER_SAVE_START:
+		SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED);
+		break;
+	case WM_FILTER_SAVE_END:
+		SetThreadExecutionState(ES_CONTINUOUS);
+		break;
+		
 	default:
 		break;
 	}
 	return FALSE;
 }
 
+/*
+History
+
+2008/08/17 version 0.01
+・最初の公開バージョン
+
+2008/09/07 version 0.02
+・時間ジャンプウィンドウにフォーカスがある場合でも、←、→、[、] などの
+  ショートカットキーが使えるようにした。 
+
+2008/10/04 version 0.03
+・ファイルを開いていないときは、ボタンを押せないように変更。
+・ジャンプウィンドウプラグインの画面を同期して表示できるように変更。
+
+2009/11/01 version 0.04
+・エンコード中は、PC がスリープ状態にならないように変更。（Win2k 以降必須）
+
+*/
