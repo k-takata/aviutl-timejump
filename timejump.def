@@ -1,3 +1,4 @@
 EXPORTS
 	GetFilterTable @1
+	GetFilterTableYUY2=GetFilterTable @2
 

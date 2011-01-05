@@ -8,6 +8,13 @@
 //#define DEBUG
 //#include "dbgtrace.h"
 
+// cl /LD /O1 timejump.cpp timejump.def /Fetimejump.auf
+#pragma comment(linker, "/opt:nowin98 /merge:.rdata=.text")
+#pragma comment(lib, "kernel32.lib")
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "gdi32.lib")
+
+
 #ifndef lengthof
 #define lengthof(arr)	(sizeof(arr) / sizeof((arr)[0]))
 #endif
@@ -106,7 +113,7 @@ FILTER_DLL filter = {
 	NULL, NULL,
 	NULL,
 	NULL,
-	"時間ジャンプ version 0.04 by K.Takata",
+	"時間ジャンプ version 0.05 by K.Takata",
 	NULL, NULL,
 	NULL, NULL, NULL, NULL,
 	NULL,
@@ -446,5 +453,8 @@ History
 
 2009/11/01 version 0.04
 ・エンコード中は、PC がスリープ状態にならないように変更。（Win2k 以降必須）
+
+2011/01/06 version 0.05
+・YUY2 フィルタモードに対応。
 
 */
