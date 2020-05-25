@@ -1,0 +1,5 @@
+*.bat	text eol=CRLF
+*.cpp	text eol=CRLF working-tree-encoding=CP932
+*.def	text eol=CRLF
+*.h	text eol=CRLF
+*.mak	text eol=CRLF
