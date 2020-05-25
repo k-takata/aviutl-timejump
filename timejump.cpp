@@ -8,12 +8,6 @@
 //#define DEBUG
 //#include "dbgtrace.h"
 
-// cl /LD /O1 timejump.cpp timejump.def /Fetimejump.auf
-#pragma comment(linker, "/opt:nowin98 /merge:.rdata=.text")
-#pragma comment(lib, "kernel32.lib")
-#pragma comment(lib, "user32.lib")
-#pragma comment(lib, "gdi32.lib")
-
 
 #ifndef lengthof
 #define lengthof(arr)	(sizeof(arr) / sizeof((arr)[0]))
