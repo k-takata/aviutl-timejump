@@ -45,10 +45,12 @@
 #define IDC_EDIT		131
 #define IDC_JUMP		132
 
-struct {
+struct command_table {
 	char *title;
 	int id;
-} buttons[] = {
+};
+
+command_table buttons[] = {
 	{"-0:01", IDC_BCK_1SEC},
 	{"+0:01", IDC_FWD_1SEC},
 	{"-0:05", IDC_BCK_5SEC},
@@ -63,6 +65,33 @@ struct {
 	{"+1:00", IDC_FWD_1MIN},
 	{"-1:30", IDC_BCK_1_5MIN},
 	{"+1:30", IDC_FWD_1_5MIN},
+};
+
+command_table commands[] = {
+	{"-15:00",IDC_BCK_15MIN},
+	{"-10:00",IDC_BCK_10MIN},
+	{"-5:00", IDC_BCK_5MIN},
+	{"-3:00", IDC_BCK_3MIN},
+	{"-2:00", IDC_BCK_2MIN},
+	{"-1:30", IDC_BCK_1_5MIN},
+	{"-1:00", IDC_BCK_1MIN},
+	{"-0:30", IDC_BCK_30SEC},
+	{"-0:15", IDC_BCK_15SEC},
+	{"-0:10", IDC_BCK_10SEC},
+	{"-0:05", IDC_BCK_5SEC},
+	{"-0:01", IDC_BCK_1SEC},
+	{"+0:01", IDC_FWD_1SEC},
+	{"+0:05", IDC_FWD_5SEC},
+	{"+0:10", IDC_FWD_10SEC},
+	{"+0:15", IDC_FWD_15SEC},
+	{"+0:30", IDC_FWD_30SEC},
+	{"+1:00", IDC_FWD_1MIN},
+	{"+1:30", IDC_FWD_1_5MIN},
+	{"+2:00", IDC_FWD_2MIN},
+	{"+3:00", IDC_FWD_3MIN},
+	{"+5:00", IDC_FWD_5MIN},
+	{"+10:00",IDC_FWD_10MIN},
+	{"+15:00",IDC_FWD_15MIN},
 };
 
 #define WINDOW_W	((BUTTON_W + BUTTON_MARGIN) * 2 + BUTTON_MARGIN)
@@ -107,7 +136,7 @@ FILTER_DLL filter = {
 	NULL, NULL,
 	NULL,
 	NULL,
-	"時間ジャンプ version 0.05 by K.Takata",
+	"時間ジャンプ version 0.06 by K.Takata",
 	NULL, NULL,
 	NULL, NULL, NULL, NULL,
 	NULL,
@@ -154,7 +183,7 @@ BOOL CALLBACK EnumThreadWndProc(HWND hwnd, LPARAM lParam);
 HWND FindJumpWindow(void)
 {
 	HWND hwndJump = NULL;
-	
+
 	EnumThreadWindows(GetCurrentThreadId(), EnumThreadWndProc, (LPARAM) &hwndJump);
 	return hwndJump;
 }
@@ -166,7 +195,7 @@ HWND FindJumpWindow(void)
 BOOL CALLBACK EnumThreadWndProc(HWND hwnd, LPARAM lParam)
 {
 	char buf[80];
-	
+
 	GetWindowText(hwnd, buf, lengthof(buf));
 	buf[lengthof(JUMPWINDOWNAME)-1] = '\0';
 	if (lstrcmp(buf, JUMPWINDOWNAME) != 0) {
@@ -190,11 +219,11 @@ BOOL timejump(void *editp, FILTER *fp, int sec, bool abs = false)
 	FILE_INFO fi;
 	int new_frame, cur_frame, frame_n;
 	HWND hwndJump;
-	
+
 	fp->exfunc->get_file_info(editp, &fi);
 	cur_frame = fp->exfunc->get_frame(editp);
 	frame_n = fp->exfunc->get_frame_n(editp);
-	
+
 	if (abs) {
 		cur_frame = 0;
 	}
@@ -208,7 +237,7 @@ BOOL timejump(void *editp, FILTER *fp, int sec, bool abs = false)
 		new_frame = frame_n - 1;
 	}
 	fp->exfunc->set_frame(editp,  new_frame);
-	
+
 	if (fp->check[0]) {
 		hwndJump = FindJumpWindow();
 		if (hwndJump && IsWindowVisible(hwndJump)) {
@@ -216,7 +245,7 @@ BOOL timejump(void *editp, FILTER *fp, int sec, bool abs = false)
 					MAKEWPARAM(IDC_JUMPWINDOW_MAINWNDFRAME, 0), 0);
 		}
 	}
-	
+
 	return TRUE;
 }
 
@@ -225,7 +254,7 @@ int get_second(const char *str, bool *abs)
 {
 	int sec = 0;
 	int sign = 1;
-	
+
 	while (*str == ' ')
 		str++;
 	if ((*str == '+') || (*str == '-')) {
@@ -237,7 +266,7 @@ int get_second(const char *str, bool *abs)
 	} else {
 		*abs = true;
 	}
-	
+
 	while (1) {
 		int i = 0;
 		while ('0' <= *str && *str <= '9') {
@@ -261,7 +290,7 @@ int get_second(const char *str, bool *abs)
 void EnableToolWindow(HWND hwnd, BOOL bEnable)
 {
 	HWND hwndChild = NULL;
-	
+
 	while ((hwndChild = FindWindowEx(hwnd, hwndChild, NULL, NULL)) != NULL) {
 		EnableWindow(hwndChild, bEnable);
 	}
@@ -317,7 +346,7 @@ BOOL func_WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
 	HWND hwndBtn;
 	HWND hwndChild;
 	//	TRUEを返すと全体が再描画される
-	
+
 	switch (message) {
 	case WM_FILTER_INIT:
 		hwndChild = FindWindowEx(hwnd, NULL, "BUTTON", check_name[0]);
@@ -325,7 +354,7 @@ BOOL func_WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
 				BUTTON_MARGIN,
 				(BUTTON_H + BUTTON_MARGIN) * (lengthof(buttons) / 2 + 1) + BUTTON_MARGIN*2,
 				0, 0, SWP_NOSIZE | SWP_NOZORDER);
-		
+
 		hFont = CreateFont(-12, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
 				DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
 				DEFAULT_QUALITY, DEFAULT_PITCH, NULL);
@@ -357,16 +386,19 @@ BOOL func_WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
 		g_ButtonProc = SubclassWindow(hwndBtn, ButtonProc);
 		g_EditProc = SubclassWindow(hwndEdit, EditProc);
 		EnableToolWindow(hwnd, FALSE);
+		for (i = 0; i < lengthof(commands); i++) {
+			fp->exfunc->add_menu_item(fp, commands[i].title, hwnd, commands[i].id, 0, 0);
+		}
 		break;
-		
+
 	case WM_FILTER_FILE_OPEN:
 		EnableToolWindow(hwnd, TRUE);
 		break;
-		
+
 	case WM_FILTER_FILE_CLOSE:
 		EnableToolWindow(hwnd, FALSE);
 		break;
-		
+
 	case WM_FILTER_EXIT:
 	//	SubclassWindow(hwndEdit, g_EditProc);
 		while ((hwndChild = FindWindowEx(hwnd, NULL, NULL, NULL)) != NULL) {
@@ -374,8 +406,9 @@ BOOL func_WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
 		}
 		DeleteObject(hFont);
 		break;
-		
+
 	case WM_COMMAND:
+	case WM_FILTER_COMMAND:
 		switch (wParam) {
 		case IDC_BCK_1SEC:		timejump(editp, fp, -1);	break;
 		case IDC_FWD_1SEC:		timejump(editp, fp, +1);	break;
@@ -401,54 +434,32 @@ BOOL func_WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
 		case IDC_FWD_10MIN:		timejump(editp, fp, +600);	break;
 		case IDC_BCK_15MIN:		timejump(editp, fp, -900);	break;
 		case IDC_FWD_15MIN:		timejump(editp, fp, +900);	break;
-			
+
 		case IDC_JUMP:
 			GetWindowText(hwndEdit, buf, lengthof(buf));
 			i = get_second(buf, &abs);
 			timejump(editp, fp, i, abs);
 			break;
-			
+
 		default:
 			return FALSE;
 		}
 		return TRUE;
-		
+
 	case WM_KEYDOWN:
 	case WM_KEYUP:
 		PostMessage(GetWindowOwner(hwnd), message, wParam, lParam);
 		break;
-		
+
 	case WM_FILTER_SAVE_START:
 		SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED);
 		break;
 	case WM_FILTER_SAVE_END:
 		SetThreadExecutionState(ES_CONTINUOUS);
 		break;
-		
+
 	default:
 		break;
 	}
 	return FALSE;
 }
-
-/*
-History
-
-2008/08/17 version 0.01
-・最初の公開バージョン
-
-2008/09/07 version 0.02
-・時間ジャンプウィンドウにフォーカスがある場合でも、←、→、[、] などの
-  ショートカットキーが使えるようにした。 
-
-2008/10/04 version 0.03
-・ファイルを開いていないときは、ボタンを押せないように変更。
-・ジャンプウィンドウプラグインの画面を同期して表示できるように変更。
-
-2009/11/01 version 0.04
-・エンコード中は、PC がスリープ状態にならないように変更。（Win2k 以降必須）
-
-2011/01/06 version 0.05
-・YUY2 フィルタモードに対応。
-
-*/
