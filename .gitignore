@@ -1,0 +1,6 @@
+*.auf
+*.exp
+*.lib
+*.obj
+filter.h
+*~
